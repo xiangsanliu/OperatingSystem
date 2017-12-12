@@ -1,5 +1,6 @@
 //
 // Created by xiang on 2017/12/12.
+// 存储管理
 //
 
 #ifndef OPERATINGSYSTEM_STORAGE_MANAGE_H
@@ -35,7 +36,7 @@ bool sortByStartIndex(Memory m1, Memory m2){
     return m1.size < m2.size;
 }
 
-//分配
+//首次适应算法
 void assign_ff(Process *process) {
 
     for (unsigned int i=0 ; i < memoryList.size(); i++ ) {
@@ -73,7 +74,8 @@ void recycle(Process process) {
     cout<<"回收成功"<<endl<<endl;
 }
 
-void first_fit() {
+
+void domain() {
     Memory first{
             0, 1024
     };
@@ -96,7 +98,7 @@ void first_fit() {
         int index;
         cin>>index;
         if (processList.at(index).flag==0) {
-            assign_ff(& processList.at(index));
+            assign_ff(& processList.at(index));     //使用首次适应算法
             printProcess();
             printMemory();
         } else {
@@ -108,6 +110,7 @@ void first_fit() {
 
 }
 
+//最佳适应算法
 void assign_bf(Process *process) {
     int di = 65535;
     int index = -1;

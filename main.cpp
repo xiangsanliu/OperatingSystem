@@ -5,6 +5,6 @@ using namespace std;
 
 int main() {
     cout<<"hello wrold"<<endl;
-    first_fit();
+    domain();
     return 0;
 }

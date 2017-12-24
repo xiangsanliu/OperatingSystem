@@ -136,9 +136,9 @@ void assign_bf(Process *process) {
 }
 
 void printProcess() {
-    cout<<"编号   "<<"\t"<<"进程需要的空间   "<<"\t"<<"进程分配状态    "<<"\t"<<"空间起始位置    "<<endl;
-    for (unsigned int i=0 ; i < processList.size(); i++ ) {
-        cout<<i<<"\t"<<processList.at(i).memory<<"\t"<<processList.at(i).flag<<"\t"<<processList.at(i).start_index<<endl;
+    cout<<"进程需要的空间"<<'\t'<<"进程分配状态"<<'\t'<<"空间起始位置"<<endl;
+    for (auto & item:processList) {
+        cout<<item.memory<<'\t'<<item.flag<<'\t'<<item.start_index<<endl;
     }
     cout<<endl;
 

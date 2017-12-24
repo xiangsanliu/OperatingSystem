@@ -6,8 +6,9 @@
 // 死锁
 //
 
-#include <stdbool.h>
-#include <stdio.h>
+
+#include <cstdio>
+
 #define PROCESS_NUM 5
 
 typedef struct {

@@ -12,6 +12,8 @@
 #include <algorithm>
 #include <cstdio>
 
+#define MAX_LOOP 999
+
 using namespace std;
 
 typedef struct {
@@ -40,20 +42,19 @@ bool sortByStartIndex(Memory m1, Memory m2){
 void assign_ff(Process *process) {
 
     for (unsigned int i=0 ; i < memoryList.size(); i++ ) {
-        if (process->memory == memoryList.at(i).size) {
+        if (process->memory == memoryList.at(i).size) {         //如果刚好等于当前空间
             process->start_index = memoryList.at(i).start_index;
             process->flag = 1;
-            memoryList.erase(memoryList.cbegin()+i);
+            memoryList.erase(memoryList.cbegin()+i);            //从空间队列中删除
             return;
         } else if (process->memory < memoryList.at(i).size) {
-            process->start_index = memoryList.at(i).start_index;
+            process->start_index = memoryList.at(i).start_index;    //如果当前空间大于所需空间
             memoryList.at(i).start_index += process->memory;
             process->flag = 1;
             memoryList.at(i).size -= process->memory;
             return;
         }
     }
-
     cout<<"分配失败"<<endl<<endl;
 }
 
@@ -63,12 +64,12 @@ void recycle(Process process) {
     memory.start_index = process.start_index;
     memory.size = process.memory;
     memoryList.push_back(memory);
-    sort(memoryList.begin(), memoryList.end(), sortByStartIndex);
+    sort(memoryList.begin(), memoryList.end(), sortByStartIndex);   //根据分区起始位置排序
     int size = 0;
-    for (unsigned int i=0 ; i < memoryList.size(); i++) {
-        size += memoryList.at(i).size;
-        if (size == memory.start_index) {
-            memoryList.at(i).size += memory.size;
+    for (unsigned int i=0 ;i<memoryList.size()-1; i++) {            //整理内存
+        if (memoryList.at(i).start_index+memoryList.at(i).size == memoryList.at(i+1).start_index) {
+            memoryList.at(i).size += memoryList.at(i+1).size;
+            memoryList.erase(memoryList.cbegin()+i+1);
         }
     }
     cout<<"回收成功"<<endl<<endl;
@@ -93,9 +94,9 @@ void domain() {
     printProcess();
     printMemory();
 
-    while (true) {
+    for (int i=0; i<MAX_LOOP; i++) {
         cout<<"选择序号：";
-        int index;
+        unsigned int index;
         cin>>index;
         if (processList.at(index).flag==0) {
             assign_ff(& processList.at(index));     //使用首次适应算法
@@ -113,7 +114,7 @@ void domain() {
 //最佳适应算法
 void assign_bf(Process *process) {
     int di = 65535;
-    int index = -1;
+    unsigned int index = 0;
     for (unsigned int i=0; i< memoryList.size(); i++) {
         if (memoryList.at(i).size - process->memory < di) {
             di = memoryList.at(i).size - process->memory;
@@ -144,9 +145,9 @@ void printProcess() {
 }
 
 void printMemory() {
-    cout<<"空间起始"<<"\t"<<"空间大小"<<endl;
-    for (unsigned int i=0; i< memoryList.size(); i++) {
-        cout<<memoryList.at(i).start_index<<"\t"<<memoryList.at(i).size<<endl;
+    cout<<"空间起始位置"<<"\t"<<"空间大小"<<endl;
+    for (auto &item: memoryList) {
+        cout<<item.start_index<<"\t"<<item.size<<endl;
     }
     cout<<endl;
 }

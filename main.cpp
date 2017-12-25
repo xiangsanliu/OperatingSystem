@@ -1,10 +1,10 @@
 #include <iostream>
 #include "storage_manage.h"
+#include "locktest.h"
 
 using namespace std;
 
 int main() {
-    cout<<"hello wrold"<<endl;
-    domain();
+    doLock();
     return 0;
 }

@@ -10,12 +10,13 @@
 
 using namespace std;
 
-int resourceAvaliable = 10;         //å½“å‰æ€»å‰©ä½™èµ„æºæ•°
-int resourceNeed[] = {7, 1, 3};     //éœ€è¦çš„èµ„æºæ•°
-int resourceAlloation[] = {0, 2, 3};//å·²åˆ†é…çš„èµ„æºæ•°
+int resourceAvaliable = 10;         //µ±Ç°×ÜÊ£Óà×ÊÔ´Êı
+int resourceNeed[] = {0, 0, 0};     //ĞèÒªµÄ×ÊÔ´Êı
+int resourceAlloation[] = {0, 0, 0};//ÒÑ·ÖÅäµÄ×ÊÔ´Êı
 int safeSeuence[PROCESS_NUM] ;
+bool isFinish[PROCESS_NUM] = {false, false, false};
 
-//é¢„åˆ†é…
+//Ô¤·ÖÅä
 void preAlloc(int process, int resource) {
     resourceAvaliable -= resource;
 
@@ -24,6 +25,7 @@ void preAlloc(int process, int resource) {
     resourceNeed[process] -= resource;
 }
 
+//µ±·ÖÅä²»°²È«Ê±£¬»Øµ½°²È«×´Ì¬
 void rollBack(int process, int resource) {
 
     resourceAvaliable += resource;
@@ -34,10 +36,13 @@ void rollBack(int process, int resource) {
 
 }
 
-//æ£€æŸ¥åˆ†é…æ˜¯å¦å®‰å…¨
+//¼ì²é·ÖÅäÊÇ·ñ°²È«
 bool isSafe() {
     int work = resourceAvaliable;
-    bool finish[PROCESS_NUM] = {false, false, false};
+    bool  finish[PROCESS_NUM];
+    for (int i=0 ;i<PROCESS_NUM; i++) {
+        finish[i] = isFinish[i];
+    }
     int j = 0;
     for (int i=0; i<PROCESS_NUM; i++) {
         if (!finish[i]) {
@@ -49,44 +54,62 @@ bool isSafe() {
             }
         }
     }
-    for (bool item : finish) {
-        if (!item) {
+    for (bool i : finish) {
+        if (!i) {
             return false;
         }
     }
     return true;
 }
 
+//ÉêÇë×ÊÔ´
 bool request(int process, int request) {
     if (request <= resourceNeed[process]) {
         if (request <= resourceAvaliable) {
             preAlloc(process, request);
+            if (resourceNeed[process] == 0) {               //½ø³ÌÍê³ÉÁË
+                isFinish[process] = true;
+                resourceAvaliable += resourceAlloation[process];
+            }
             if (isSafe())
                 return true;
             else {
                 rollBack(process, request);
-                cout<<"åˆ†é…å¤±è´¥ï¼Œå¯èƒ½ä¼šå‡ºç°æ­»é”"<<endl;
+                cout<<"·ÖÅäÊ§°Ü£¬¿ÉÄÜ»á³öÏÖËÀËø"<<endl;
             }
         } else {
-            cout<<"ç”³è¯·å¤±è´¥,å‰©ä½™èµ„æºä¸è¶³"<<endl;
+            cout<<"ÉêÇëÊ§°Ü,Ê£Óà×ÊÔ´²»×ã"<<endl;
         }
     } else {
-        cout<<"ç”³è¯·å¤±è´¥ï¼Œç”³è¯·çš„èµ„æºå¤§äºæ‰€éœ€çš„èµ„æº"<<endl;
+        cout<<"ÉêÇëÊ§°Ü£¬ÉêÇëµÄ×ÊÔ´´óÓÚËùĞèµÄ×ÊÔ´"<<endl;
     }
     return false;
 }
 
 void doLock() {
+    cout<<"ÊäÈë¸÷Ïß³ÌĞèÒªµÄ×ÊÔ´×ÜÊı:"<<endl;
+    for (int i=0 ;i<PROCESS_NUM; i++) {
+        cin>>resourceNeed[i];
+    }
     int loopNum = 30;
     int process, resource;
     while (loopNum--) {
-        cout<<"è¾“å…¥çº¿ç¨‹å·å’Œç”³è¯·çš„å†…å­˜:"<<endl;
-        cin>>process>>resource;
-        request(process, resource);
-        cout<<"å½“å‰å®‰å…¨åºåˆ—:" ;
-        for (int i=0; i<PROCESS_NUM; i++){
-            cout<<safeSeuence[i]<< ' '<<endl;
+        cout<<"µ±Ç°Ê£Óà×ÊÔ´£º"<<resourceAvaliable<<endl;
+        cout<<"½ø³ÌºÅ "<<"µ±Ç°·ÖÅä "<<"ĞèÒª "<<"ÊÇ·ñÍê³É"<<endl;
+        for (int i=0 ;i< PROCESS_NUM; i++) {
+            cout<<i<<'\t'<<resourceAlloation[i]<<'\t'<<resourceNeed[i]<<'\t'<<isFinish[i]<<'\t'<<endl;
         }
+        cout<<endl;
+        cout<<"ÊäÈë½ø³ÌºÅºÍÉêÇëµÄÄÚ´æ:"<<endl;
+        cin>>process>>resource;
+        cout<<endl;
+        request(process, resource);
+        cout<<"µ±Ç°°²È«ĞòÁĞ:" ;
+        for (int i : safeSeuence) {
+            cout<< i << ' ';
+        }
+        cout<<endl;
+        cout<<"---------------------------------------------------------------"<<endl<<endl;
     }
 }
 

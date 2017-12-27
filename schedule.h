@@ -5,61 +5,131 @@
 #ifndef OPERATINGSYSTEM_SCHEDULE_H
 #define OPERATINGSYSTEM_SCHEDULE_H
 
+#include <iostream>
+#include <vector>
+#include <algorithm>
 #include <cstdio>
-#include <cstdlib>
+using namespace std;
 
 #define RUN 1000
 #define READY 1001
 #define FINISH 1002
 
 typedef struct PCBDefine{
-    char name[20];      //è¿›ç¨‹æ ‡è¯†ç¬¦
-    int pri;            //ä¼˜å…ˆçº§
-    int timeNeeded;             //è¿›ç¨‹æ‰€éœ€çš„æ—¶é—´ç‰‡æ•°
-    int timeOccupied;           //å ç”¨çš„CPUæ—¶é—´æ•°
-    short processStstus;        //è¿›ç¨‹çŠ¶æ€
-    struct PCBDefine *next;       //
+    char name[20];      //½ø³Ì±êÊ¶·û
+    int pri;            //ÓÅÏÈ¼¶
+    int timeNeeded;             //½ø³ÌËùĞèµÄÊ±¼äÆ¬Êı
+    int timeOccupied;           //Õ¼ÓÃµÄCPUÊ±¼äÊı
+    short processStstus;        //½ø³Ì×´Ì¬
 }PCB;
+vector<PCB> readyList;      //¾ÍĞ÷¶ÓÁĞ
+vector<PCB> finishList;     //Íê³É¶ÓÁĞ
 
-PCB * currentProcess;       //å½“å‰è¿›ç¨‹
-PCB * readyHead;            //å‡†å¤‡é˜Ÿåˆ—é˜Ÿé¦–
-PCB * finishHead;           //å®Œæˆé˜Ÿåˆ—é˜Ÿé¦–
+/**
+ * ³õÊ¼»¯½ø³Ì
+ */
+void initProcess();
 
-void insertIntoReady(PCB * pcb) {
-    PCB * index = readyHead;
-    while (index->next) {
-        if (pcb->pri >= index->next->pri) {
-            pcb->next = index->next->next;
-            index->next = pcb;
-            return;
-        }
-        index = index->next;
+/**
+ * ²åÈë¾ÍĞ÷¶ÓÁĞ
+ * @param pcb ½ø³Ì¿ØÖÆ¿é
+ */
+void insertIntoReady(PCB pcb);
+
+/**
+ * ³öÈëÍê³É¶ÓÁĞ
+ * @param pcb ½ø³Ì¿ØÖÆ¿é
+ */
+void insertIntoFinish(PCB pcb);
+
+/**
+ * ´òÓ¡¾ÍĞ÷¶ÓÁĞ
+ */
+void printReady();
+
+/**
+ * ´òÓ¡Íê³É¶ÓÁĞ
+ */
+void printFinish();
+
+/**
+ * Ö´ĞĞ½ø³Ì
+ * @param processIndex ½ø³ÌºÅ
+ */
+void execute(unsigned int processIndex);
+
+bool sortByPriority(PCB p1, PCB p2);
+void sortReadyList();
+
+
+void doSchedule() {
+    initProcess();
+    while(!readyList.empty()) {
+        execute(0);
+        printReady();
     }
-    index->next = pcb;
+    printFinish();
+}
+
+void sortReadyList() {
+    sort(readyList.begin(), readyList.end(), sortByPriority);
+}
+
+void execute(unsigned int processIndex)  {
+    readyList.at(processIndex).processStstus = RUN;    //½ø³ÌÕıÔÚÔËĞĞ
+    readyList.at(processIndex).pri -= 3;               //½ø³ÌÓÅÏÈ¼¶ -3
+    readyList.at(processIndex).timeNeeded --;          //½ø³ÌËùĞèÊ±¼äÆ¬ -1
+    if (readyList.at(processIndex).timeNeeded == 0) {  //½ø³Ì½áÊø
+        readyList.at(processIndex).processStstus = FINISH;
+        insertIntoFinish(readyList.at(processIndex));  //½øÈëÍê³É¶ÓÁĞ
+        readyList.erase(readyList.cbegin() + processIndex); //´Ó¾ÍĞ÷¶ÓÁĞÉ¾³ı
+        return;
+    }
+    readyList.at(processIndex).processStstus = READY; //½ø³ÌÖØĞÂ²åÈë¾ÍĞ÷¶ÓÁĞ
+    sortReadyList();
+}
+
+void insertIntoReady(PCB pcb) {
+    readyList.push_back(pcb);
+    sortReadyList();
+}
+
+void insertIntoFinish(PCB pcb) {
+    finishList.push_back(pcb);
 }
 
 void printReady() {
-    PCB * index = readyHead;
-    while (index->next) {
-        printf("xiangjianjian1");
-        printf("%s\n", index->next->name);
+    cout<<"½ø³ÌÃû\t"<<"½ø³ÌÓÅÏÈ¼¶\t"<<"ËùĞèÊ±¼ä"<<endl;
+    for (auto & pcb: readyList) {
+        cout<<pcb.name<<'\t'<<pcb.pri<<'\t'<<pcb.timeNeeded<<'\t'<<endl;
+    }
+    cout<<endl;
+}
+
+void printFinish() {
+    cout<<endl;
+    cout<<"½ø³ÌÍê³ÉĞòÁĞ:"<<endl;
+    for (auto & pcb: finishList) {
+        cout<<pcb.name<<endl;
     }
 }
 
-void initProcesss() {
+bool sortByPriority(PCB p1, PCB p2) {
+    return p1.pri > p2.pri;
+}
+
+void initProcess() {
     int n;
-    printf("Input process number:");
-    scanf("%d", &n);
-    printf("Input process name, priority, timeNeeded:\n");
-    readyHead =(PCB *) malloc(sizeof(PCB));
-    readyHead->next = NULL;
+    cout<<"Input process number:";
+    cin>>n;
     for (int i=0; i<n; i++) {
-        PCB * pcb = (PCB * ) malloc(sizeof(PCB));
-        scanf("%s", &pcb->name);
-        scanf("%d", & pcb->pri);
-        scanf("%d", & pcb->timeNeeded);
-        printf("xiangjianjian");
-//        insertIntoReady(pcb);
+        cout<<"Input process name, priority, timeNeeded:(num "<<i<< "):\t";
+        PCB pcb{};
+        cin>>pcb.name;
+        cin>>pcb.pri;
+        cin>>pcb.timeNeeded;
+        pcb.processStstus = READY;
+        insertIntoReady(pcb);
     }
     printReady();
 }

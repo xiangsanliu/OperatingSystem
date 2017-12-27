@@ -1,10 +1,11 @@
 #include <iostream>
 #include "storage_manage.h"
-#include "locktest.h"
+#include "lock-single.h"
+#include "schedule.h"
 
 using namespace std;
 
 int main() {
-    doLock();
+    doSchedule();
     return 0;
 }

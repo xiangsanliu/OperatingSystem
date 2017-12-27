@@ -13,8 +13,36 @@ using namespace std;
 int resourceAvaliable = 10;         //当前总剩余资源数
 int resourceNeed[] = {0, 0, 0};     //需要的资源数
 int resourceAlloation[] = {0, 0, 0};//已分配的资源数
-int safeSeuence[PROCESS_NUM] ;
-bool isFinish[PROCESS_NUM] = {false, false, false};
+int safeSeuence[PROCESS_NUM] ;      //安全序列
+bool isFinish[PROCESS_NUM] = {false, false, false}; //是否完成的标记
+
+/**
+ * 资源预分配
+ * @param process 进程号
+ * @param resource 资源数
+ */
+void preAlloc(int process, int resource);
+
+/**
+ * 当分配不安全时回到安全状态
+ * @param process 进程号
+ * @param resource 资源数
+ */
+void roolBack(int process, int resource);
+
+/**
+ * 检查分配是否安全
+ * @return 分配是否安全
+ */
+bool isSafe();
+
+/**
+ * 请求资源
+ * @param process 进程号
+ * @param request 请求的资源数
+ * @return 是否请求成功
+ */
+bool request(int process, int request);
 
 //预分配
 void preAlloc(int process, int resource) {
@@ -40,16 +68,16 @@ void rollBack(int process, int resource) {
 bool isSafe() {
     int work = resourceAvaliable;
     bool  finish[PROCESS_NUM];
-    for (int i=0 ;i<PROCESS_NUM; i++) {
+    for (int i=0 ;i<PROCESS_NUM; i++) {     //获取进程的状态
         finish[i] = isFinish[i];
     }
     int j = 0;
     for (int i=0; i<PROCESS_NUM; i++) {
         if (!finish[i]) {
-            if (resourceNeed[i] <= work) {
-                work += resourceAlloation[i];
-                finish[i] = true;
-                safeSeuence[j++] = i;
+            if (resourceNeed[i] <= work) {      //当前进程安全
+                work += resourceAlloation[i];       //回收进程
+                finish[i] = true;               //假设进程已完成
+                safeSeuence[j++] = i;   //更新安全序列
                 i = -1;
             }
         }

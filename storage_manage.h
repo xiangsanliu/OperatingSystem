@@ -75,42 +75,6 @@ void recycle(Process process) {
     cout<<"回收成功"<<endl<<endl;
 }
 
-
-void domain() {
-    Memory first{
-            0, 1024
-    };
-    memoryList.push_back(first);
-    cout<<"请输入程序的个数：";
-    cin>>n;
-    cout<<"请输入各程序所需的内存空间：";
-    for (int i=0 ;i<n; i++) {
-        Process process{};
-        process.flag = 0;
-        process.start_index = -1;
-        cin>> process.memory;
-        processList.push_back(process);
-    }
-    printProcess();
-    printMemory();
-
-    for (int i=0; i<MAX_LOOP; i++) {
-        cout<<"选择序号：";
-        unsigned int index;
-        cin>>index;
-        if (processList.at(index).flag==0) {
-            assign_ff(& processList.at(index));     //使用首次适应算法
-            printProcess();
-            printMemory();
-        } else {
-            recycle(processList.at(index));
-            printProcess();
-            printMemory();
-        }
-    }
-
-}
-
 //最佳适应算法
 void assign_bf(Process *process) {
     int di = 65535;
@@ -133,6 +97,51 @@ void assign_bf(Process *process) {
     } else {
         cout<<"分配失败"<<endl;
     }
+}
+
+void domain() {
+    Memory first{
+            0, 1024
+    };
+    memoryList.push_back(first);
+    cout<<"请输入程序的个数：";
+    cin>>n;
+    cout<<"请输入各程序所需的内存空间：";
+    for (int i=0 ;i<n; i++) {
+        Process process{};
+        process.flag = 0;
+        process.start_index = -1;
+        cin>> process.memory;
+        processList.push_back(process);
+    }
+    printProcess();
+    printMemory();
+    cout<<"选择功能,首次适应算法call 1、最佳适应算法call2:"<<endl;
+    int fun;
+    cin>>fun;
+
+    for (int i=0; i<MAX_LOOP; i++) {
+        cout<<"选择序号：";
+        unsigned int index;
+        cin>>index;
+        if (processList.at(index).flag==0) {
+            if (fun==1) {
+                assign_ff(&processList.at(index));     //使用首次适应算法
+            } else if (fun==2) {
+                assign_bf(&processList.at(index));      //使用最佳适应算法
+            } else {
+                return;
+            }
+
+            printProcess();     //打印进程情况
+            printMemory();      //打印存储空间情况
+        } else {
+            recycle(processList.at(index));
+            printProcess();     //打印进程信息
+            printMemory();      //打印存储空间信息
+        }
+    }
+
 }
 
 void printProcess() {
